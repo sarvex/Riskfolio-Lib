@@ -142,13 +142,11 @@ def assets_constraints(constraints, asset_classes):
                     d = 1
                 elif data[i][4] == "<=":
                     d = -1
+                A1 = [0] * m
                 if data[i][5] != "":
-                    A1 = [0] * m
                     A1[item] = d
-                    A.append(A1)
                     B.append([data[i][5] * d])
                 else:
-                    A1 = [0] * m
                     A1[item] = 1
                     if data[i][6] == "Assets":
                         item2 = assetslist.index(data[i][8])
@@ -159,8 +157,8 @@ def assets_constraints(constraints, asset_classes):
                             asset_classes[data[i][7]].values == data[i][8], 1, 0
                         )
                     A1 = ((np.array(A1) + np.array(A2) * data[i][9] * -1) * d).tolist()
-                    A.append(A1)
                     B.append([0])
+                A.append(A1)
             elif data[i][1] == "All Assets":
                 item = len(assetslist)
                 if data[i][4] == ">=":
@@ -199,7 +197,6 @@ def assets_constraints(constraints, asset_classes):
                     A1 = np.where(asset_classes[data[i][2]].values == data[i][3], 1, 0)
                     A1 = np.array(A1) * d
                     A1 = A1.tolist()
-                    A.append(A1)
                     B.append([data[i][5] * d])
                 else:
                     A1 = np.where(asset_classes[data[i][2]].values == data[i][3], 1, 0)
@@ -212,16 +209,16 @@ def assets_constraints(constraints, asset_classes):
                             asset_classes[data[i][7]].values == data[i][8], 1, 0
                         )
                     A1 = ((np.array(A1) + np.array(A2) * data[i][9] * -1) * d).tolist()
-                    A.append(A1)
                     B.append([0])
+                A.append(A1)
             elif data[i][1] == "Each asset in a class":
                 if data[i][4] == ">=":
                     d = 1
                 elif data[i][4] == "<=":
                     d = -1
+                l = 0
                 if data[i][5] != "":
                     A1 = np.where(asset_classes[data[i][2]].values == data[i][3], 1, 0)
-                    l = 0
                     for k in A1:
                         if k == 1:
                             A3 = [0] * m
@@ -231,7 +228,6 @@ def assets_constraints(constraints, asset_classes):
                         l = l + 1
                 else:
                     A1 = np.where(asset_classes[data[i][2]].values == data[i][3], 1, 0)
-                    l = 0
                     for k in A1:
                         if k == 1:
                             A3 = [0] * m
@@ -523,15 +519,12 @@ def assets_views(views, asset_classes):
                     elif data[i][6] == "" and data[i][7] == "" and data[i][8] == "":
                         P2 = [0] * m
                         valid = True
-                    if valid == True:
+                    if valid:
                         P1 = ((np.array(P1) - np.array(P2)) * d).tolist()
                         P.append(P1)
                         Q.append([data[i][5] * d])
             elif data[i][1] == "Classes":
-                if data[i][4] == ">=":
-                    d = 1
-                else:
-                    d = -1
+                d = 1 if data[i][4] == ">=" else -1
                 if data[i][5] != "":
                     P1 = np.where(asset_classes[data[i][2]].values == data[i][3], 1, 0)
                     P1 = P1 / np.sum(P1)
@@ -553,7 +546,7 @@ def assets_views(views, asset_classes):
                     elif data[i][6] == "" and data[i][7] == "" and data[i][8] == "":
                         P2 = [0] * m
                         valid = True
-                    if valid == True:
+                    if valid:
                         P1 = ((np.array(P1) - np.array(P2)) * d).tolist()
                         P.append(P1)
                         Q.append([data[i][5] * d])
@@ -819,7 +812,7 @@ def assets_clusters(
 
     for i, v in enumerate(clusters_inds):
         clusters["Assets"].append(labels[i])
-        clusters["Clusters"].append("Cluster " + str(v))
+        clusters["Clusters"].append(f"Cluster {str(v)}")
 
     clusters = pd.DataFrame(clusters)
     clusters = clusters.sort_values(by=["Assets"])

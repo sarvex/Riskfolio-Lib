@@ -243,9 +243,7 @@ def VaR_Hist(X, alpha=0.05):
     sorted_a = np.sort(a, axis=0)
     index = int(np.ceil(alpha * len(sorted_a)) - 1)
     value = -sorted_a[index]
-    value = np.array(value).item()
-
-    return value
+    return np.array(value).item()
 
 
 def CVaR_Hist(X, alpha=0.05):
@@ -325,9 +323,7 @@ def WR(X):
 
     sorted_a = np.sort(a, axis=0)
     value = -sorted_a[0]
-    value = np.array(value).item()
-
-    return value
+    return np.array(value).item()
 
 
 def LPM(X, MAR=0, p=1):
@@ -377,11 +373,7 @@ def LPM(X, MAR=0, p=1):
 
     value = MAR - a
 
-    if p == 2:
-        n = value.shape[0] - 1
-    else:
-        n = value.shape[0]
-
+    n = value.shape[0] - 1 if p == 2 else value.shape[0]
     value = np.sum(np.power(value[np.where(value >= 0)], p)) / n
     value = np.power(value, 1 / p).item()
 
@@ -681,14 +673,8 @@ def ADD_Abs(X):
         if DD > 0:
             value += DD
         n += 1
-    if n == 0:
-        value = 0
-    else:
-        value = value / (n - 1)
-
-    value = np.array(value).item()
-
-    return value
+    value = 0 if n == 0 else value / (n - 1)
+    return np.array(value).item()
 
 
 def DaR_Abs(X, alpha=0.05):
@@ -740,9 +726,7 @@ def DaR_Abs(X, alpha=0.05):
     sorted_DD = np.sort(np.array(DD), axis=0)
     index = int(np.ceil(alpha * len(sorted_DD)) - 1)
     value = -sorted_DD[index]
-    value = np.array(value).item()
-
-    return value
+    return np.array(value).item()
 
 
 def CDaR_Abs(X, alpha=0.05):
@@ -908,9 +892,7 @@ def RLDaR_Abs(X, alpha=0.05, kappa=0.01, solver=None):
         DD.append(-(peak - i))
     del DD[0]
 
-    value = RLVaR_Hist(np.array(DD), alpha=alpha, kappa=kappa, solver=solver)
-
-    return value
+    return RLVaR_Hist(np.array(DD), alpha=alpha, kappa=kappa, solver=solver)
 
 
 def UCI_Abs(X):
@@ -958,11 +940,7 @@ def UCI_Abs(X):
         if DD > 0:
             value += DD**2
         n += 1
-    if n == 0:
-        value = 0
-    else:
-        value = np.sqrt(value / (n - 1))
-
+    value = 0 if n == 0 else np.sqrt(value / (n - 1))
     value = np.array(value).item()
 
     return value
@@ -1062,14 +1040,8 @@ def ADD_Rel(X):
         if DD > 0:
             value += DD
         n += 1
-    if n == 0:
-        value = 0
-    else:
-        value = value / (n - 1)
-
-    value = np.array(value).item()
-
-    return value
+    value = 0 if n == 0 else value / (n - 1)
+    return np.array(value).item()
 
 
 def DaR_Rel(X, alpha=0.05):
@@ -1121,9 +1093,7 @@ def DaR_Rel(X, alpha=0.05):
     sorted_DD = np.sort(np.array(DD), axis=0)
     index = int(np.ceil(alpha * len(sorted_DD)) - 1)
     value = -sorted_DD[index]
-    value = np.array(value).item()
-
-    return value
+    return np.array(value).item()
 
 
 def CDaR_Rel(X, alpha=0.05):
@@ -1289,9 +1259,7 @@ def RLDaR_Rel(X, alpha=0.05, kappa=0.01, solver=None):
         DD.append(-(peak - i) / peak)
     del DD[0]
 
-    value = RLVaR_Hist(np.array(DD), alpha=alpha, kappa=kappa, solver=solver)
-
-    return value
+    return RLVaR_Hist(np.array(DD), alpha=alpha, kappa=kappa, solver=solver)
 
 
 def UCI_Rel(X):
@@ -1339,11 +1307,7 @@ def UCI_Rel(X):
         if DD > 0:
             value += DD**2
         n += 1
-    if n == 0:
-        value = 0
-    else:
-        value = np.sqrt(value / (n - 1))
-
+    value = 0 if n == 0 else np.sqrt(value / (n - 1))
     value = np.array(value).item()
 
     return value
@@ -1378,9 +1342,7 @@ def GMD(X):
 
     T = a.shape[0]
     w_ = owa.owa_gmd(T)
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 def L_Moment(X, k=2):
@@ -1421,9 +1383,7 @@ def L_Moment(X, k=2):
 
     T = a.shape[0]
     w_ = owa.owa_l_moment(T, k=k)
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 def L_Moment_CRM(X, k=4, method="MSD", g=0.5, max_phi=0.5, solver=None):
@@ -1487,9 +1447,7 @@ def L_Moment_CRM(X, k=4, method="MSD", g=0.5, max_phi=0.5, solver=None):
     w_ = owa.owa_l_moment_crm(
         T, k=k, method=method, g=g, max_phi=max_phi, solver=solver
     )
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 def TG(X, alpha=0.05, a_sim=100):
@@ -1525,9 +1483,7 @@ def TG(X, alpha=0.05, a_sim=100):
 
     T = a.shape[0]
     w_ = owa.owa_tg(T, alpha, a_sim)
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 def RG(X):
@@ -1559,9 +1515,7 @@ def RG(X):
 
     T = a.shape[0]
     w_ = owa.owa_rg(T)
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 def CVRG(X, alpha=0.05, beta=None):
@@ -1598,9 +1552,7 @@ def CVRG(X, alpha=0.05, beta=None):
 
     T = a.shape[0]
     w_ = owa.owa_cvrg(T, alpha=alpha, beta=beta)
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 def TGRG(X, alpha=0.05, a_sim=100, beta=None, b_sim=None):
@@ -1642,9 +1594,7 @@ def TGRG(X, alpha=0.05, a_sim=100, beta=None, b_sim=None):
 
     T = a.shape[0]
     w_ = owa.owa_tgrg(T, alpha=alpha, a_sim=a_sim, beta=beta, b_sim=b_sim)
-    value = (w_.T @ np.sort(a, axis=0)).item()
-
-    return value
+    return (w_.T @ np.sort(a, axis=0)).item()
 
 
 ###############################################################################
@@ -1819,9 +1769,7 @@ def Sharpe_Risk(
     elif rm == "SKT":
         risk = SemiKurtosis(a)
 
-    value = risk
-
-    return value
+    return risk
 
 
 def Sharpe(
@@ -1970,9 +1918,7 @@ def Sharpe(
         solver=solver,
     )
 
-    value = (ret - rf) / risk
-
-    return value
+    return (ret - rf) / risk
 
 
 ###############################################################################
@@ -2084,11 +2030,7 @@ def Risk_Contribution(
         returns_ = np.array(returns, ndmin=2)
 
     RC = []
-    if rm in ["RLVaR", "RLDaR"]:
-        d_i = 0.0001
-    else:
-        d_i = 0.0000001
-
+    d_i = 0.0001 if rm in ["RLVaR", "RLDaR"] else 0.0000001
     for i in range(0, w_.shape[0]):
         delta = np.zeros((w_.shape[0], 1))
         delta[i, 0] = d_i
@@ -2195,6 +2137,4 @@ def Risk_Contribution(
         RC_i = (risk_1 - risk_2) / (2 * d_i) * w_[i, 0]
         RC.append(RC_i)
 
-    RC = np.array(RC, ndmin=1)
-
-    return RC
+    return np.array(RC, ndmin=1)

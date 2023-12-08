@@ -259,7 +259,7 @@ def jupyter_report(
     year = str(datetime.datetime.now().year)
 
     title = "Riskfolio-Lib Report"
-    subtitle = "Copyright (c) 2020-" + year + ", Dany Cajas. All rights reserved."
+    subtitle = f"Copyright (c) 2020-{year}, Dany Cajas. All rights reserved."
 
     fig.suptitle(title, fontsize="xx-large", y=1.011, fontweight="bold")
     ax[0].set_title(subtitle, fontsize="large", ha="center", pad=10)
@@ -353,10 +353,9 @@ def excel_report(
     w.to_excel(writer, sheet_name="Resume", startrow=36, startcol=0)
     returns.to_excel(writer, sheet_name="Returns", index_label=["Date"])
 
-    # Get the xlsxwriter objects from the dataframe writer object.
-    workbook = writer.book
     worksheet1 = writer.sheets["Resume"]
     worksheet2 = writer.sheets["Returns"]
+    workbook = writer.book
     worksheet3 = workbook.add_worksheet("Portfolios")
     worksheet4 = workbook.add_worksheet("Absdev")
     worksheet5 = workbook.add_worksheet("CumRet")
@@ -456,7 +455,7 @@ def excel_report(
             worksheet1.write(i, 0, labels_1[i], cell_format1)
 
     for i in range(0, len(portfolios)):
-        a = "Portfolio " + str(i + 1)
+        a = f"Portfolio {str(i + 1)}"
         worksheet1.write(3, 1 + i, a, cell_format1)
         worksheet1.write(36, 1 + i, a, cell_format1)
         worksheet3.write(0, 1 + i, a, cell_format1)
@@ -509,7 +508,7 @@ def excel_report(
         )
         STDEV = "=STDEV(Portfolios!" + r_2 + ") * SQRT(" + str(t_factor) + ")"
         MAD = "=AVERAGE(Absdev!" + r_2 + ") * SQRT(" + str(t_factor) + ")"
-        ALPHA = "=" + str(alpha)
+        ALPHA = f"={str(alpha)}"
         VaR = (
             "=-SMALL(Portfolios!"
             + r_2
@@ -553,13 +552,7 @@ def excel_report(
             + str(t_factor)
             + ")"
         )
-        EVaR = (
-            "="
-            + str(rk.EVaR_Hist(returns @ w.iloc[:, j], alpha=alpha)[0])
-            + " * SQRT("
-            + str(t_factor)
-            + ")"
-        )
+        EVaR = f"={str(rk.EVaR_Hist(returns @ w.iloc[:, j], alpha=alpha)[0])} * SQRT({str(t_factor)})"
         WR = "=-MIN(Portfolios!" + r_2 + ") * SQRT(" + str(t_factor) + ")"
         MDD = "=MAX(Drawdown!" + r_2 + ")"
         ADD = "=AVERAGE(Drawdown!" + r_2 + ")"
@@ -590,9 +583,9 @@ def excel_report(
             + DaR[2:]
             + ")"
         )
-        EDaR = "=" + str(rk.EDaR_Abs(returns @ w.iloc[:, j], alpha=alpha)[0])
+        EDaR = f"={str(rk.EDaR_Abs(returns @ w.iloc[:, j], alpha=alpha)[0])}"
         UCI = "=SQRT(SUMSQ(Drawdown!" + r_2 + ")/COUNT(Drawdown!" + r_2 + "))"
-        MAR = "=" + str(rf)
+        MAR = f"={str(rf)}"
         FLPM = "=AVERAGE(devBelowTarget!" + r_2 + ") * SQRT(" + str(t_factor) + ")"
         SLPM = (
             "=SQRT(SUMSQ(devBelowTarget!"
@@ -664,8 +657,8 @@ def excel_report(
     worksheet1.set_row(1, 215)
     worksheet1.merge_range("A2:K2", __LICENSE__.replace("2021", year), merge_format)
     worksheet1.write(2, 0, "https://github.com/dcajasn/Riskfolio-Lib")
-    worksheet1.write(31, 0, "(1) Annualized, multiplied by " + str(t_factor))
-    worksheet1.write(32, 0, "(2) Annualized, multiplied by √" + str(t_factor))
+    worksheet1.write(31, 0, f"(1) Annualized, multiplied by {str(t_factor)}")
+    worksheet1.write(32, 0, f"(2) Annualized, multiplied by √{str(t_factor)}")
     worksheet1.write(33, 0, "(3) Based on uncompounded cumulated returns")
     worksheet1.write(0, 0, "Riskfolio-Lib Report", cell_format2)
 
