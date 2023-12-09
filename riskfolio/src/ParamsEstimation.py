@@ -92,8 +92,6 @@ def mean_vector(X, method="hist", d=0.94, target="b1"):
         mu = np.array(X.ewm(alpha=1 - d).mean().iloc[-1, :], ndmin=2)
     elif method == "ewma2":
         mu = np.array(X.ewm(alpha=1 - d, adjust=False).mean().iloc[-1, :], ndmin=2)
-    elif method == "ewma2":
-        mu = np.array(X.ewm(alpha=1 - d, adjust=False).mean().iloc[-1, :], ndmin=2)
     elif method in ["JS", "BS", "BOP"]:
         T, n = X.shape
         ones = np.ones((n, 1))
@@ -388,7 +386,7 @@ def forward_regression(X, y, criterion="pvalue", threshold=0.05, verbose=False):
                 print("Add {} with p-value {:.6}".format(new_feature, best_pvalue))
 
         # This part is how to deal when there isn't an asset with pvalue lower than threshold
-        if len(included) == 0:
+        if not included:
             excluded = list(set(X.columns) - set(included))
             best_pvalue = 999999
             new_feature = None
@@ -418,7 +416,7 @@ def forward_regression(X, y, criterion="pvalue", threshold=0.05, verbose=False):
         flag = False
         n = len(excluded)
 
-        for j in range(n):
+        for _ in range(n):
             value = {}
             n_ini = len(excluded)
             for i in excluded:
@@ -593,7 +591,7 @@ def backward_regression(X, y, criterion="pvalue", threshold=0.05, verbose=False)
         flag = False
         n = len(included)
 
-        for j in range(n):
+        for _ in range(n):
             value = {}
             n_ini = len(included)
             for i in included:
@@ -1653,13 +1651,10 @@ def bootstrapping(X, kind="stationary", q=0.05, n_sim=3000, window=3, seed=0):
     else:
         raise ValueError("kind only can be 'stationary', 'circular' or 'moving'")
 
-    i = 0
-    for data in gen.bootstrap(n_sim):
+    for i, data in enumerate(gen.bootstrap(n_sim)):
         A = data[0][0]
         mus[i] = A.mean().to_numpy().reshape(1, m)
         covs[i] = A.cov().to_numpy()
-        i += 1
-
     mu_l = np.percentile(mus, q / 2 * 100, axis=0, keepdims=True).reshape(1, m)
     mu_u = np.percentile(mus, 100 - q / 2 * 100, axis=0, keepdims=True).reshape(1, m)
 
@@ -1679,7 +1674,7 @@ def bootstrapping(X, kind="stationary", q=0.05, n_sim=3000, window=3, seed=0):
     cov_mu = pd.DataFrame(cov_mu, index=cols, columns=cols)
 
     cov_sigma = covs - X.cov().to_numpy()
-    cov_sigma = cov_sigma.reshape((n_sim, m * m), order="F")
+    cov_sigma = cov_sigma.reshape((n_sim, m**2), order="F")
     cov_sigma = np.cov(cov_sigma.T)
 
     cov_sigma = np.diag(np.diag(cov_sigma))

@@ -153,7 +153,7 @@ def plot_series(returns, w, cmap="tab20", n_colors=20, height=6, width=10, ax=No
     if returns.shape[1] != w.shape[0]:
         a1 = str(returns.shape)
         a2 = str(w.shape)
-        raise ValueError("shapes " + a1 + " and " + a2 + " not aligned")
+        raise ValueError(f"shapes {a1} and {a2} not aligned")
 
     if ax is None:
         fig = plt.gcf()

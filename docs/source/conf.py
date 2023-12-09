@@ -99,10 +99,10 @@ html_search_language = 'en'
 
 # Example configuration for intersphinx: refer to the Python standard library.
 # intersphinx_mapping = {'https://docs.python.org/': None}
-python_version = '.'.join(map(str, sys.version_info[0:2]))
+python_version = '.'.join(map(str, sys.version_info[:2]))
 intersphinx_mapping = {
     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
-    'python': ('https://docs.python.org/' + python_version, None),
+    'python': (f'https://docs.python.org/{python_version}', None),
     'matplotlib': ('https://matplotlib.org', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'sklearn': ('https://scikit-learn.org/stable/', None),
@@ -112,7 +112,7 @@ intersphinx_mapping = {
     'xlsxwriter': ('https://xlsxwriter.readthedocs.io', None),
     'networkx': ('https://networkx.org/documentation/stable/', None),
     'astropy': ('https://docs.astropy.org/en/stable/', None),
-    'pybind11': ('https://pybind11.readthedocs.io/en/stable/',None),
+    'pybind11': ('https://pybind11.readthedocs.io/en/stable/', None),
 }
 
 # -- Options for todo extension ----------------------------------------------

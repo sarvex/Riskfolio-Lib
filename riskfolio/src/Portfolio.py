@@ -374,26 +374,24 @@ class Portfolio(object):
     @property
     def benchweights(self):
         n = self.numassets
-        if self._benchweights is not None:
-            if self._benchweights.shape[0] == n and self._benchweights.shape[1] == 1:
-                a = self._benchweights
-            else:
-                raise NameError("Weights must have a size of shape (n_assets,1)")
-        else:
+        if self._benchweights is None:
             a = np.array(np.ones((n, 1)) / n)
+        elif self._benchweights.shape[0] == n and self._benchweights.shape[1] == 1:
+            a = self._benchweights
+        else:
+            raise NameError("Weights must have a size of shape (n_assets,1)")
         return a
 
     @benchweights.setter
     def benchweights(self, value):
         a = value
         n = self.numassets
-        if a is not None:
-            if a.shape[0] == n and a.shape[1] == 1:
-                a = a
-            else:
-                raise NameError("Weights must have a size of shape (n_assets,1)")
-        else:
+        if a is None:
             a = np.array(np.ones((n, 1)) / n)
+        elif a.shape[0] == n and a.shape[1] == 1:
+            a = a
+        else:
+            raise NameError("Weights must have a size of shape (n_assets,1)")
         self._benchweights = a
 
     @property
@@ -551,62 +549,59 @@ class Portfolio(object):
         self.mu = pe.mean_vector(self.returns, method=method_mu, d=d)
         self.cov = pe.covar_matrix(self.returns, method=method_cov, **kwargs)
         value = af.is_pos_def(self.cov, threshold=1e-8)
-        for i in range(5):
-            if value == False:
-                try:
-                    self.cov = af.cov_fix(self.cov, method="clipped", threshold=1e-5)
-                    value = af.is_pos_def(self.cov, threshold=1e-8)
-                except:
-                    break
-            else:
+        for _ in range(5):
+            if value != False:
                 break
 
+            try:
+                self.cov = af.cov_fix(self.cov, method="clipped", threshold=1e-5)
+                value = af.is_pos_def(self.cov, threshold=1e-8)
+            except:
+                break
         if value == False:
             print("You must convert self.cov to a positive definite matrix")
 
-        if method_kurt not in [None, "semi"]:
+        if method_kurt is None or method_kurt == "semi":
+            self.kurt = None
+            self.skurt = None
+            self.L_2 = None
+            self.S_2 = None
+
+        else:
             T, N = self.returns.shape
             self.L_2 = cf.duplication_elimination_matrix(N)
             self.S_2 = cf.duplication_summation_matrix(N)
             self.kurt = pe.cokurt_matrix(self.returns, method=method_kurt, **kwargs)
             value = af.is_pos_def(self.kurt, threshold=1e-8)
-            for i in range(5):
-                if value == False:
-                    try:
-                        self.kurt = af.cov_fix(
-                            self.kurt, method="clipped", threshold=1e-5
-                        )
-                        value = af.is_pos_def(self.kurt, threshold=1e-8)
-                    except:
-                        break
-                else:
+            for _ in range(5):
+                if value != False:
                     break
 
+                try:
+                    self.kurt = af.cov_fix(
+                        self.kurt, method="clipped", threshold=1e-5
+                    )
+                    value = af.is_pos_def(self.kurt, threshold=1e-8)
+                except:
+                    break
             if value == False:
                 print("You must convert self.kurt to a positive definite matrix")
 
             self.skurt = pe.cokurt_matrix(self.returns, method="semi")
             value = af.is_pos_def(self.skurt, threshold=1e-8)
-            for i in range(5):
-                if value == False:
-                    try:
-                        self.skurt = af.cov_fix(
-                            self.skurt, method="clipped", threshold=1e-5
-                        )
-                        value = af.is_pos_def(self.skurt, threshold=1e-8)
-                    except:
-                        break
-                else:
+            for _ in range(5):
+                if value != False:
                     break
 
+                try:
+                    self.skurt = af.cov_fix(
+                        self.skurt, method="clipped", threshold=1e-5
+                    )
+                    value = af.is_pos_def(self.skurt, threshold=1e-8)
+                except:
+                    break
             if value == False:
                 print("You must convert self.skurt to a positive definite matrix")
-
-        else:
-            self.kurt = None
-            self.skurt = None
-            self.L_2 = None
-            self.S_2 = None
 
     def blacklitterman_stats(
         self,
@@ -704,18 +699,17 @@ class Portfolio(object):
         self.cov_bl = cov
 
         value = af.is_pos_def(self.cov_bl, threshold=1e-8)
-        for i in range(5):
-            if value == False:
-                try:
-                    self.cov_bl = af.cov_fix(
-                        self.cov_bl, method="clipped", threshold=1e-5
-                    )
-                    value = af.is_pos_def(self.cov_bl, threshold=1e-8)
-                except:
-                    break
-            else:
+        for _ in range(5):
+            if value != False:
                 break
 
+            try:
+                self.cov_bl = af.cov_fix(
+                    self.cov_bl, method="clipped", threshold=1e-5
+                )
+                value = af.is_pos_def(self.cov_bl, threshold=1e-8)
+            except:
+                break
         if value == False:
             print("You must convert self.cov_bl to a positive definite matrix")
 
@@ -930,9 +924,7 @@ class Portfolio(object):
             if self.B is None:
                 self.B = pe.loadings_matrix(X=F, Y=X, **kwargs_1)
                 const = True
-            elif self.B is not None:
-                pass
-        elif B is not None:
+        else:
             self.B = B
 
         if flavor == "BLB":
@@ -1009,18 +1001,17 @@ class Portfolio(object):
         self.cov_bl_fm = cov
 
         value = af.is_pos_def(self.cov_bl_fm, threshold=1e-8)
-        for i in range(5):
-            if value == False:
-                try:
-                    self.cov_bl_fm = af.cov_fix(
-                        self.cov_bl_fm, method="clipped", threshold=1e-5
-                    )
-                    value = af.is_pos_def(self.cov_bl_fm, threshold=1e-8)
-                except:
-                    break
-            else:
+        for _ in range(5):
+            if value != False:
                 break
 
+            try:
+                self.cov_bl_fm = af.cov_fix(
+                    self.cov_bl_fm, method="clipped", threshold=1e-5
+                )
+                value = af.is_pos_def(self.cov_bl_fm, threshold=1e-8)
+            except:
+                break
         if value == False:
             print("You must convert self.cov_bl_fm to a positive definite matrix")
 

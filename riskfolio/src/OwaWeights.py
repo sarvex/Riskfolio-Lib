@@ -45,9 +45,13 @@ def owa_l_moment(T, k=2):
     """
     w = []
     for i in range(1, T + 1):
-        a = 0
-        for j in range(k):
-            a += (-1) ** j * binom(k - 1, j) * binom(i - 1, k - 1 - j) * binom(T - i, j)
+        a = sum(
+            (-1) ** j
+            * binom(k - 1, j)
+            * binom(i - 1, k - 1 - j)
+            * binom(T - i, j)
+            for j in range(k)
+        )
         a *= 1 / (k * binom(T, k))
         w.append(a)
     return np.array(w).reshape(-1, 1)
@@ -69,9 +73,7 @@ def owa_gmd(T):
         An OWA weights vector of size Tx1.
     """
 
-    w_ = []
-    for i in range(1, T + 1):
-        w_.append(2 * i - 1 - T)
+    w_ = [2 * i - 1 - T for i in range(1, T + 1)]
     w_ = 2 * np.array(w_) / (T * (T - 1))
     w_ = w_.reshape(-1, 1)
 
@@ -124,11 +126,7 @@ def owa_wcvar(T, alphas, weights):
         An OWA weights vector of size Tx1.
     """
 
-    w_ = 0
-    for i, j in zip(alphas, weights):
-        w_ += owa_cvar(T, i) * j
-
-    return w_
+    return sum(owa_cvar(T, i) * j for i, j in zip(alphas, weights))
 
 
 def owa_tg(T, alpha=0.05, a_sim=100):
@@ -153,8 +151,10 @@ def owa_tg(T, alpha=0.05, a_sim=100):
 
     alphas = np.linspace(alpha, 0.0001, a_sim)[::-1]
     w_ = [(alphas[1] - 0) * alphas[0] / alphas[-1] ** 2]
-    for i in range(1, len(alphas) - 1):
-        w_.append((alphas[i + 1] - alphas[i - 1]) * alphas[i] / alphas[-1] ** 2)
+    w_.extend(
+        (alphas[i + 1] - alphas[i - 1]) * alphas[i] / alphas[-1] ** 2
+        for i in range(1, len(alphas) - 1)
+    )
     w_.append((alphas[-1] - alphas[-2]) / alphas[-1])
     w_ = owa_wcvar(T, alphas, w_)
 
@@ -230,9 +230,7 @@ def owa_cvrg(T, alpha=0.05, beta=None):
     if beta is None:
         beta = alpha
 
-    w_ = owa_cvar(T, alpha) - owa_cvar(T, beta)[::-1]
-
-    return w_
+    return owa_cvar(T, alpha) - owa_cvar(T, beta)[::-1]
 
 
 def owa_wcvrg(T, alphas, weights_a, betas=None, weights_b=None):
@@ -265,9 +263,7 @@ def owa_wcvrg(T, alphas, weights_a, betas=None, weights_b=None):
         betas = alphas
         weights_b = weights_a
 
-    w_ = owa_wcvar(T, alphas, weights_a) - owa_wcvar(T, betas, weights_b)[::-1]
-
-    return w_
+    return owa_wcvar(T, alphas, weights_a) - owa_wcvar(T, betas, weights_b)[::-1]
 
 
 def owa_tgrg(T, alpha=0.05, a_sim=100, beta=None, b_sim=None):
@@ -301,9 +297,7 @@ def owa_tgrg(T, alpha=0.05, a_sim=100, beta=None, b_sim=None):
     if b_sim is None:
         b_sim = a_sim
 
-    w_ = owa_tg(T, alpha, a_sim) - owa_tg(T, beta, b_sim)[::-1]
-
-    return w_
+    return owa_tg(T, alpha, a_sim) - owa_tg(T, beta, b_sim)[::-1]
 
 
 def owa_l_moment_crm(T, k=4, method="MSD", g=0.5, max_phi=0.5, solver=None):

@@ -122,16 +122,10 @@ def j_LoGo(S, separators, cliques):
 
     """
     N = S.shape[0]
-    if isinstance(separators, dict) == False:
-        separators_temp = {}
-        for i in range(len(separators)):
-            separators_temp[i] = separators[i, :]
-
-    if isinstance(cliques, dict) == False:
-        cliques_temp = {}
-        for i in range(len(cliques)):
-            cliques_temp[i] = cliques[i, :]
-
+    if not isinstance(separators, dict):
+        separators_temp = {i: separators[i, :] for i in range(len(separators))}
+    if not isinstance(cliques, dict):
+        cliques_temp = {i: cliques[i, :] for i in range(len(cliques))}
     Jlogo = np.zeros((N, N))
     for i in cliques_temp.keys():
         v = np.int32(cliques_temp[i])
@@ -189,7 +183,7 @@ def PMFG_T2s(W, nargout=3):
     s = np.sum(W * (W > np.mean(W)), axis=1)
     j = np.int32(np.argsort(s)[::-1].reshape(-1))
 
-    in_v[0:4] = j[0:4]
+    in_v[:4] = j[:4]
     ou_v = np.setdiff1d(np.arange(0, N), in_v)  # list of vertices not inserted yet
     # build the tetrahedron with largest strength
     tri[0, :] = in_v[[0, 1, 2]]
@@ -248,7 +242,10 @@ def PMFG_T2s(W, nargout=3):
 
     if nargout > 3:
         cliques = np.vstack(
-            (in_v[0:4].reshape(1, -1), np.hstack((separators, in_v[4:].reshape(-1, 1))))
+            (
+                in_v[:4].reshape(1, -1),
+                np.hstack((separators, in_v[4:].reshape(-1, 1))),
+            )
         )
     else:
         cliques = None
@@ -416,16 +413,10 @@ def CliqHierarchyTree2s(Apm, method1):
         indx2 = np.argwhere(np.ravel(T) == 2)
         if len(indx1) > len(indx2):
             indx_s = np.vstack((indx2, indx0))
-            del indx1, indx2
         else:
             indx_s = np.vstack((indx1, indx0))
-            del indx1, indx2
-
-        if (indx_s.shape[0] == 0) == 1:
-            Sb[n] = 0
-        else:
-            Sb[n] = len(indx_s) - 3  # -3
-
+        del indx1, indx2
+        Sb[n] = 0 if (indx_s.shape[0] == 0) == 1 else len(indx_s) - 3
         M[indx_s, n] = 1
         # del Indicator, InsideCliq, count, T, Temp, cliq_vec, IndxNot, InsideCliq
         del T, cliq_vec, IndxNot
@@ -717,7 +708,7 @@ def breadth(CIJ, source):
                 branch[v] = u
                 Q = np.hstack((Q, v))
 
-        Q = Q[1 : len(Q)]
+        Q = Q[1:]
         color[u] = black
 
     return (distance, branch)
@@ -969,7 +960,7 @@ def HierarchyConstruct4s(Rpm, Dpm, Tc, Adjv, Mv):
                     V
                 ]  # Initiate the label vector which labels for the clusters.
                 LabelVec2 = LabelVec1.copy()
-                for v in range(0, len(V) - 1):
+                for _ in range(0, len(V) - 1):
                     (PairLink, dvu) = LinkageFunction(
                         dpm, LabelVec
                     )  # Look for the pair of clusters which produces the best linkage
@@ -993,7 +984,7 @@ def HierarchyConstruct4s(Rpm, Dpm, Tc, Adjv, Mv):
             V
         ]  # Initiate the label vector which labels for the clusters.
         LabelVec2 = LabelVec1.copy()
-        for b in range(0, len(Bub) - 1):
+        for _ in range(0, len(Bub) - 1):
             (PairLink, dvu) = LinkageFunction(dpm, LabelVec)
             # %[PairLink,dvu]=LinkageFunction(rpm,LabelVec);
             LabelVec[
@@ -1012,7 +1003,7 @@ def HierarchyConstruct4s(Rpm, Dpm, Tc, Adjv, Mv):
     # %Inter-cluster hierarchy construction
     LabelVec2 = LabelVec1.copy()
     dcl = np.ones(len(LabelVec1))
-    for n in range(0, len(kvec) - 1):
+    for _ in range(0, len(kvec) - 1):
         (PairLink, dvu) = LinkageFunction(Dpm, LabelVec1)
         # %[PairLink,dvu]=LinkageFunction(Rpm,LabelVec);
         LabelVec2[np.logical_or(LabelVec1 == PairLink[0], LabelVec1 == PairLink[1])] = (
@@ -1083,6 +1074,6 @@ def DendroConstruct(Zi, LabelVec1, LabelVec2, LinkageDist):
         print("Check the codes")
         return
 
-    Z = np.vstack((Zi, np.hstack((np.sort(np.unique(LabelVec1[indx])), LinkageDist))))
-
-    return Z
+    return np.vstack(
+        (Zi, np.hstack((np.sort(np.unique(LabelVec1[indx])), LinkageDist)))
+    )

@@ -82,7 +82,7 @@ if __name__ == "__main__":
     import sys
 
     if sys.version_info[:2] < (3, int(PYTHON_REQUIRES[-1])):
-        raise RuntimeError("Riskfolio-Lib requires python " + PYTHON_REQUIRES)
+        raise RuntimeError(f"Riskfolio-Lib requires python {PYTHON_REQUIRES}")
 
     # Obtain the numpy include directory.  This logic works across numpy versions.
     try:

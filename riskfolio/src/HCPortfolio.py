@@ -190,10 +190,7 @@ class HCPortfolio(object):
                     )
                 inv_risk[k, 0] = risk
 
-            if rm == "MV":
-                inv_risk = 1 / np.power(inv_risk, 2)
-            else:
-                inv_risk = 1 / inv_risk
+            inv_risk = 1 / np.power(inv_risk, 2) if rm == "MV" else 1 / inv_risk
             weights = inv_risk * (1 / np.sum(inv_risk))
 
         weights = weights.reshape(-1, 1)
@@ -204,27 +201,26 @@ class HCPortfolio(object):
     def _opt_w(self, returns, mu, cov, obj="MinRisk", rm="MV", rf=0, l=2):
         if returns.shape[1] == 1:
             weights = np.array([1]).reshape(-1, 1)
-        else:
-            if obj in {"MinRisk", "Utility", "Sharpe"}:
-                port = rp.Portfolio(returns=returns)
-                port.assets_stats(method_mu="hist", method_cov="hist", d=0.94)
-                port.cov = cov
-                if self.solvers is not None:
-                    port.solvers = self.solvers
-                if mu is not None:
-                    port.mu = mu
-                weights = port.optimization(
-                    model="Classic", rm=rm, obj=obj, rf=rf, l=l, hist=True
-                ).to_numpy()
-            elif obj in {"ERC"}:
-                port = rp.Portfolio(returns=returns)
-                port.assets_stats(method_mu="hist", method_cov="hist", d=0.94)
-                port.cov = cov
-                if self.solvers is not None:
-                    port.solvers = self.solvers
-                weights = port.rp_optimization(
-                    model="Classic", rm=rm, rf=rf, b=None, hist=True
-                ).to_numpy()
+        elif obj in {"MinRisk", "Utility", "Sharpe"}:
+            port = rp.Portfolio(returns=returns)
+            port.assets_stats(method_mu="hist", method_cov="hist", d=0.94)
+            if self.solvers is not None:
+                port.solvers = self.solvers
+            port.cov = cov
+            if mu is not None:
+                port.mu = mu
+            weights = port.optimization(
+                model="Classic", rm=rm, obj=obj, rf=rf, l=l, hist=True
+            ).to_numpy()
+        elif obj in {"ERC"}:
+            port = rp.Portfolio(returns=returns)
+            port.assets_stats(method_mu="hist", method_cov="hist", d=0.94)
+            port.cov = cov
+            if self.solvers is not None:
+                port.solvers = self.solvers
+            weights = port.rp_optimization(
+                model="Classic", rm=rm, rf=rf, b=None, hist=True
+            ).to_numpy()
 
         weights = weights.reshape(-1, 1)
 
@@ -305,7 +301,7 @@ class HCPortfolio(object):
         weights = pd.Series(1, index=self.assetslist)  # set initial weights to 1
         items = [sort_order]
 
-        while len(items) > 0:  # loop while weights is under 100%
+        while items:  # loop while weights is under 100%
             items = [
                 i[j:k]
                 for i in items
